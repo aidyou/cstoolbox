@@ -8,7 +8,7 @@ RUN case "$(uname -m)" in \
     armv7l) ARCH="armhf";; \
     *) echo "Unsupported arch: $(uname -m)"; exit 1;; \
     esac && \
-    echo "Target Architecture: $ARCH" > /arch.txt
+    RUN echo "Target Architecture: $TARGETARCH" > /arch.txt
 
 # install dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
