@@ -1,0 +1,18 @@
+.vscode/
+.git/
+__pycache__/
+*.pyc
+*.pyo
+*.pyd
+logs/
+docker/
+
+# 忽略文件
+.env
+*.log
+*.tmp
+
+# 忽略特定文件
+Dockerfile
+docker-compose.yml
+README.md

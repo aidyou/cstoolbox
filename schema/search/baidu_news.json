@@ -1,21 +1,19 @@
 {
   "config": {
-    "name": "Baidu Search",
-    "url_template": "/s?wd={kw}&pn={offset}&rn={number}&ie=utf-8&rsv_spt=1&rsv_bp=1&rsv_idx=2&rsv_enter=1&rsv_btype=i&tn=baiduhome_pg&inputT={rand}",
+    "name": "Baidu News",
+    "url_template": "/s?rtt=4&bsst=1&cl=2&tn=news&ie=utf-8&word={kw}&pn={offset}&rn={number}",
     "pagination_type": "offset",
     "pagination_param": "offset",
     "wait_for": "#content_left",
-    "browser_type": "chromium",
-    "headless": true,
     "page_timeout": 60000,
     "max_results_per_page": 50
   },
   "schema": {
-    "base_selector": "#content_left .result.c-container",
+    "base_selector": "#content_left .result-op.c-container",
     "fields": [
       {
-        "name": "site_name",
-        "selector": "a[class^='siteLink_']",
+        "name": "sitename",
+        "selector": "a[class^='source-link_']",
         "type": "text"
       },
       {
@@ -31,7 +29,12 @@
       },
       {
         "name": "summary",
-        "selector": "span[class^='content-right_']",
+        "selector": ".c-row .c-span-last span.c-color-text",
+        "type": "text"
+      },
+      {
+        "name": "publish_date",
+        "selector": ".c-row .c-span-last span.c-color-gray2",
         "type": "text"
       }
     ]

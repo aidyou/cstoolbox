@@ -1,20 +1,18 @@
 {
   "config": {
     "name": "Google News",
-    "url_template": "/search?q={kw}&ie=UTF-8&tbm=nws&newwindow=1&start={offset}&num={number}",
+    "url_template": "/search?q={kw}&ie=UTF-8&tbm=nws&newwindow=1&start={offset}&num={number}&tbs={time_period}",
     "pagination_type": "offset",
     "pagination_param": "offset",
-    "wait_for": "#rso",
-    "browser_type": "chromium",
-    "headless": true,
     "page_timeout": 60000,
-    "max_results_per_page": 25
+    "max_results_per_page": 25,
+    "wait_for": "#rcnt"
   },
   "schema": {
     "base_selector": "div[data-hveid][data-ved][data-news-cluster-id][data-news-doc-id]",
     "fields": [
       {
-        "name": "site_name",
+        "name": "sitename",
         "selector": "a > div > div > div > span",
         "type": "text"
       },

@@ -5,16 +5,19 @@
     "pagination_type": "offset",
     "pagination_param": "offset",
     "wait_for": "section[data-area='mainline']",
-    "browser_type": "chromium",
-    "headless": true,
+    "max_results_per_page": 10,
     "page_timeout": 60000,
-    "js_code": "(async () => {{ const target = {number}; let current = 10; while(current < target) {{ const btn = document.querySelector('#more-results'); if (!btn) break; const itemsBefore = document.querySelectorAll('section[data-area=\"mainline\"]>ol>li[data-layout=\"organic\"]').length; btn.scrollIntoView(); btn.click(); await new Promise(r => setTimeout(r, 2000)); const itemsAfter = document.querySelectorAll('section[data-area=\"mainline\"]>ol>li[data-layout=\"organic\"]').length; if (itemsAfter <= itemsBefore) break; current = itemsAfter; }} return current; }})()"
+    "js_code": "(async () => {{ const target = {number}; let current = 10; while(current < target) {{ const btn = document.querySelector('#more-results'); if (!btn) break; const itemsBefore = document.querySelectorAll('section[data-area=\"mainline\"]>ol>li[data-layout=\"organic\"]').length; btn.scrollIntoView(); btn.click(); await new Promise(r => setTimeout(r, 2000)); const itemsAfter = document.querySelectorAll('section[data-area=\"mainline\"]>ol>li[data-layout=\"organic\"]').length; if (itemsAfter <= itemsBefore) break; current = itemsAfter; }} return current; }})()",
+    "click_config": [{
+      "selector": "#more-results",
+      "wait": 5000
+    }]
   },
   "schema": {
     "base_selector": "section[data-area='mainline']>ol>li[data-layout='organic']",
     "fields": [
       {
-        "name": "site_name",
+        "name": "sitename",
         "selector": "article > div:nth-child(1) > div:nth-child(2) > p",
         "type": "text"
       },

@@ -2,7 +2,7 @@
 region = "com"
 
 # Proxy server URL (e.g., "http://username:password@proxy:port"). If None, no proxy is used.
-proxy = "http://127.0.0.1:15154"
+proxy = ""
 
 # proxy config: {"server": "...", "username": "..."}
 # proxy 如果不为空，则本项设置不会被用到
@@ -19,9 +19,6 @@ browser_pool_min_size = 2
 
 # max size of crawl pool
 browser_pool_max_size = 10
-
-# 用来浏览器健康度检查地址
-health_check_url = "https://www.baidu.com"
 
 #  user_data_dir (str or None): Path to a user data directory for persistent sessions.
 # If None, a temporary directory may be used. Default: None.
@@ -80,3 +77,8 @@ user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36
 
 # Mode for generating the user agent (e.g., "random"). If None, use the provided user_agent as-is. Default: None.
 user_agent_mode = None
+
+# Server root directory
+from pathlib import Path
+
+server_root = Path(__file__).resolve().parent.parent

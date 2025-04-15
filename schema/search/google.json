@@ -1,20 +1,18 @@
 {
   "config": {
     "name": "Google",
-    "url_template": "/search?q={kw}&ie=UTF-8&newwindow=1&start={offset}&num={number}",
+    "url_template": "/search?q={kw}&ie=UTF-8&newwindow=1&start={offset}&num={number}&tbs={time_period}",
     "pagination_type": "offset",
     "pagination_param": "offset",
-    "wait_for": "#rso",
-    "browser_type": "chromium",
-    "headless": true,
+    "wait_for": "#rcnt",
     "page_timeout": 60000,
     "max_results_per_page": 25
   },
   "schema": {
-    "base_selector": "div[data-hveid][data-ved].g > div[data-snc], .g > div[data-hveid][data-ved] > div[class]",
+    "base_selector": "#kp-wp-tab-overview [data-snc], #search [data-snc]",
     "fields": [
       {
-        "name": "site_name",
+        "name": "sitename",
         "selector": "a > div > div > div > div > span",
         "type": "text"
       },

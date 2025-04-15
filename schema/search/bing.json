@@ -1,19 +1,19 @@
 {
   "config": {
     "name": "Bing Search",
-    "url_template": "/search?q={kw}&first={offset}&count={number}",
+    "url_template": "/search?q={kw}&first={offset}&count={number}&filters={time_period}",
     "pagination_type": "offset",
     "pagination_param": "offset",
+    "max_results_per_page": 25,
+    "pages_selector": "li.b_pag nav[role='navigation'] a:not(.sb_pagN.sb_pagN_bp)",
     "wait_for": "#b_results",
-    "browser_type": "chromium",
-    "headless": true,
     "page_timeout": 60000
   },
   "schema": {
     "base_selector": "#b_results > li.b_algo",
     "fields": [
       {
-        "name": "site_name",
+        "name": "sitename",
         "selector": ".tilk",
         "type": "attribute",
         "attribute": "aria-label"

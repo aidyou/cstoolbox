@@ -1,72 +1,244 @@
 import asyncio
-import json
 import signal
 import uvicorn
 
 from contextlib import asynccontextmanager
-from fastapi import FastAPI, Query
+from fastapi import FastAPI, APIRouter, HTTPException, Request, Query, status, Body
 from fastapi.responses import JSONResponse
+from fastapi.staticfiles import StaticFiles
+from urllib.parse import unquote, urlparse
 
-from browser import browser_pool
+from core.browser import browser_pool
 from config import config
-from search_extractor import SearchExtractor
+from api_helper import fail, success, signal_handler, get_baidu_time_period
 
-# 存储关闭事件
+from tools.crawl import SearchTool, CrawlTool
+from tools.plot import PlotTool
+from tools.pdf import PDFTool
+
+# shutdown event
 shutdown_event = None
 
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    """处理应用程序的生命周期事件"""
+    """Handle application lifecycle events"""
     global shutdown_event
     try:
-        # 创建关闭事件
+        # Create the shutdown event
         shutdown_event = asyncio.Event()
-        # 启动时初始化
+        # Initialize at startup
         await browser_pool.initialize()
         yield
     finally:
-        # 关闭时清理
+        # Clean up resources when closing
         await browser_pool.close()
 
 
-# 使用 lifespan 创建 FastAPI 应用
+# Create router with /chp prefix
+router = APIRouter(prefix="/chp")
+# Use lifespan to create FastAPI application
 app = FastAPI(lifespan=lifespan)
+app.mount("/static", StaticFiles(directory="static"), name="static")
 
 
-def signal_handler():
-    """处理退出信号"""
-
-    async def _cleanup():
-        # 设置关闭事件
-        shutdown_event.set()
-        # 等待所有任务完成并清理资源
-        await browser_pool.close()
-        # 停止事件循环
-        loop.stop()
-
-    loop = asyncio.get_event_loop()
-    loop.create_task(_cleanup())
-
-
-@app.get("/search")
-async def search(
-    provider: str = Query(..., description="搜索引擎名称，如 google、bing 等"),
-    kw: str = Query(..., description="搜索关键词"),
-    page: int = Query(1, description="页码，默认为 1"),
-    number: int = Query(10, description="请求查询数，默认为 10"),
+@router.post("/plot")
+async def plot(
+    plot_type: str = Body(..., description="Type of plot (line, bar, pie)"),
+    data: dict = Body(..., description="Plot data"),
+    title: str = Body("", description="Plot title"),
+    x_label: str = Body("", description="Label for x-axis"),
+    y_label: str = Body("", description="Label for y-axis"),
 ) -> JSONResponse:
-    extractor = SearchExtractor(provider)
-    results = await extractor.search(kw, page=page, number=number)
-    return JSONResponse(content=results if results else [])
+    plot_tool = PlotTool()
+    result = await plot_tool.execute(
+        plot_type=plot_type,
+        data=data,
+        title=title,
+        x_label=x_label,
+        y_label=y_label,
+    )
+    return success(data=result)
+
+
+@router.get("/web_search")
+async def web_search(
+    provider: str = Query(
+        ..., description="Search engine name, such as google, bing, etc."
+    ),
+    kw: str = Query(..., description="Search keyword"),
+    page: int = Query(1, description="Page number, default is 1"),
+    number: int = Query(10, description="Number of requests, default is 10"),
+    time_period: str = Query(
+        "",
+        description="Time range, such as day (one day ago), week (one week ago), month (one month ago), year (one year ago)",
+    ),
+) -> JSONResponse:
+    """
+    Search data through search engine and return search results
+    Note: /chp prefix is automatically mapped when chatspeed calls, do not remove
+
+    Args:
+        provider (str, optional): Search engine name. Available providers: google google_news, bing, baidu, baidu_news.
+        kw (str, optional): Keyword.
+        page (int, optional): Page number. Defaults to 1.
+        number (int, optional): Number of requests. Defaults to 10.
+
+    Returns:
+        JSONResponse: Search results.
+    """
+    # Set time range parameter based on different search engine
+    if time_period:
+        if provider == "baidu":
+            time_period = get_baidu_time_period(time_period)
+        elif provider == "baidu_news":
+            time_period = ""
+        elif provider == "google":
+            time_period = (
+                f"qdr:{time_period[0]}"  # day -> d, week -> w, month -> m, year -> y
+            )
+        elif provider == "google_news":
+            time_period = f"qdr:{time_period[0]}"
+        elif provider == "bing":
+            if time_period == "day":
+                time_period = 'ex1:"ez1"'
+            elif time_period == "week":
+                time_period = 'ex1:"ez2"'
+            elif time_period == "month":
+                time_period = 'ex1:"ez3"'
+            elif time_period == "year":
+                time_period = 'ex1:"ez5"'
+    try:
+        search_tool = SearchTool()
+        results = await search_tool.execute(
+            provider=provider, kw=kw, page=page, number=number, time_period=time_period
+        )
+        return success(data=results if results else [])
+    except Exception as e:
+        return fail(message=str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.get("/web_crawler")
+async def web_crawler(
+    url: str = Query(..., description="Data extraction URL"),
+    format: str = Query("markdown", description="Output format, markdown or html"),
+) -> JSONResponse:
+    """
+    Extract data from the provided URL and return the result
+    Note: /chp prefix is automatically mapped when chatspeed calls, do not remove
+
+    Args:
+        url (str, optional): Data extraction URL.
+        format (str, optional): Output format, markdown or html. Defaults to markdown.
+
+    Raises:
+        HTTPException: If extraction fails
+
+    Returns:
+        JSONResponse: Extraction result
+    """
+    try:
+        # URL decode
+        decoded_url = unquote(url)
+        lower_url = decoded_url.lower()
+        UNSUPPORTED_EXTENSIONS = {
+            # 文档类型
+            ".pdf",
+            ".doc",
+            ".docx",
+            ".xls",
+            ".xlsx",
+            # 图片类型
+            ".jpg",
+            ".jpeg",
+            ".png",
+            ".gif",
+            ".webp",
+            ".svg",
+            ".ico",
+            ".bmp",
+            ".tiff",
+            # 音频/视频类型
+            ".mp3",
+            ".mp4",
+            ".flv",
+            ".webm",
+            ".m3u8",
+            ".mov",
+            ".wmv",
+            ".avi",
+            ".asf",
+            ".asx",
+            ".rm",
+            ".rmvb",
+            ".mkv",
+        }
+
+        if any(lower_url.endswith(ext) for ext in UNSUPPORTED_EXTENSIONS):
+            return fail(
+                message="Unsupported file type. Cannot extract data from media files",
+                status_code=status.HTTP_415_UNSUPPORTED_MEDIA_TYPE,
+            )
+
+        # Validate URL format
+        parsed_url = urlparse(decoded_url)
+        if not all([parsed_url.scheme, parsed_url.netloc]):
+            raise HTTPException(
+                status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid URL format"
+            )
+
+        crawl_tool = CrawlTool()
+        results = await crawl_tool.execute(url=decoded_url, format=format)
+
+        if not results:
+            return fail(
+                message="Unable to extract data from the specified URL",
+                status_code=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )
+
+        return success(data=results)
+
+    except HTTPException as he:
+        return fail(message=he.detail, status_code=he.status_code)
+    except Exception as e:
+        return fail(message=str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
+
+
+@router.get("/pdf")
+async def pdf(
+    url: str = Query(..., description="URL of the PDF document"),
+) -> JSONResponse:
+    pdf_tool = PDFTool()
+    result = await pdf_tool.execute(url=url)
+    return success(data=result)
+
+
+@app.get("/ping")
+async def ping() -> JSONResponse:
+    return success(data={"ping": "pong"})
+
+
+# Register router with the app after all endpoints are defined
+app.include_router(router)
+
+
+# Custom 404 handler
+@app.exception_handler(404)
+async def not_found_exception_handler(request: Request, exc: HTTPException):
+    return fail(
+        message="The requested interface does not exist",
+        detail=f"Path {request.url.path} is undefined",
+        status_code=404,
+        add_error_status_code=True,
+    )
 
 
 if __name__ == "__main__":
-    # 注册信号处理器
+    # Register signal handlers
     for sig in (signal.SIGTERM, signal.SIGINT):
         signal.signal(sig, lambda s, f: signal_handler())
 
-    # 配置并启动服务器
+    # Configure and start server
     config = uvicorn.Config(
         app, host=config.server_host, port=config.server_port, loop="asyncio"
     )
