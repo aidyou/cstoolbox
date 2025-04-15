@@ -1,0 +1,43 @@
+{
+  "config": {
+    "name": "Bing Search",
+    "url_template": "/search?q={kw}&first={offset}&count={number}",
+    "pagination_type": "offset",
+    "pagination_param": "offset",
+    "wait_for": "#b_results",
+    "browser_type": "chromium",
+    "headless": true,
+    "page_timeout": 60000
+  },
+  "schema": {
+    "base_selector": "#b_results > li.b_algo",
+    "fields": [
+      {
+        "name": "site_name",
+        "selector": ".tilk",
+        "type": "attribute",
+        "attribute": "aria-label"
+      },
+      {
+        "name": "title",
+        "selector": "h2 a",
+        "type": "text"
+      },
+      {
+        "name": "url",
+        "selector": "h2 a",
+        "type": "attribute",
+        "attribute": "href"
+      },
+      {
+        "name": "summary",
+        "selector": ".b_caption p",
+        "type": "text"
+      }
+    ],
+    "error_selectors": [
+      ".captcha",
+      "#sb_error"
+    ]
+  }
+}
