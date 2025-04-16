@@ -48,10 +48,10 @@ jobs:
         with:
           context: .
           file: ./docker/Dockerfile
-          platforms: linux/amd64,linux/arm64,linux/arm/v7,linux/ppc64le
+          platforms: linux/amd64,linux/arm64
           push: true
           build-args: |
-            TARGETARCH=${{ contains(matrix.platform, 'amd64') && 'amd64' || contains(matrix.platform, 'arm64') && 'arm64' || contains(matrix.platform, 'arm/v7') && 'arm' || 'ppc64le' }}
+            TARGETARCH=${{ contains(matrix.platform, 'amd64') && 'amd64' || contains(matrix.platform, 'arm64') && 'arm64' }}
           tags: |
             ${{ env.DOCKER_HUB_REPO }}:latest
             ${{ env.DOCKER_HUB_REPO }}:${{ steps.extract_version.outputs.version }}
