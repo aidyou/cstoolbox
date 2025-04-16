@@ -4,6 +4,8 @@ FROM python:3.10-slim AS builder
 # install dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     build-essential \
+    libxml2-dev \
+    libxslt1-dev \
     libglib2.0-0 \
     libnss3 \
     libnspr4 \
