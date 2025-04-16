@@ -28,9 +28,9 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 COPY requirements.txt .
-# 修改 playwright 安装命令
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
+    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 pip install playwright && \
     playwright install chromium
 
 # Second stage: runtime environment
