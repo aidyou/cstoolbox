@@ -1,14 +1,8 @@
 # First stage: build environment
 FROM python:3.10-slim AS builder
 
-# check arch
-RUN case "$(uname -m)" in \
-    x86_64) ARCH="amd64";; \
-    aarch64) ARCH="arm64";; \
-    armv7l) ARCH="armhf";; \
-    *) echo "Unsupported arch: $(uname -m)"; exit 1;; \
-    esac && \
-    RUN echo "Target Architecture: $TARGETARCH" > /arch.txt
+ARG TARGETARCH
+RUN echo "Target Architecture: $TARGETARCH" > /arch.txt
 
 # install dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
@@ -34,6 +28,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
 
 WORKDIR /app
 COPY requirements.txt .
+# 修改 playwright 安装命令
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
     playwright install chromium
