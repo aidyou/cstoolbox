@@ -1,11 +1,9 @@
 # First stage: build environment
 FROM python:3.10-slim AS builder
 
-ARG TARGETARCH
-RUN echo "Target Architecture: $TARGETARCH" > /arch.txt
-
 # install dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
     libglib2.0-0 \
     libnss3 \
     libnspr4 \
@@ -23,14 +21,16 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxkbcommon0 \
     libpango-1.0-0 \
     libcairo2 \
-    libasound2 && \
-    rm -rf /var/lib/apt/lists/*
+    libasound2 \
+    && rm -rf /var/lib/apt/lists/*
+
+ARG TARGETARCH
+RUN echo "Target Architecture: $TARGETARCH" > /arch.txt
 
 WORKDIR /app
 COPY requirements.txt .
 RUN pip install --upgrade pip && \
     pip install --no-cache-dir -r requirements.txt && \
-    PLAYWRIGHT_SKIP_BROWSER_DOWNLOAD=1 pip install playwright && \
     playwright install chromium
 
 # Second stage: runtime environment
