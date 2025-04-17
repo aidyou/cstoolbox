@@ -1,4 +1,5 @@
 import asyncio
+import os
 import signal
 import uvicorn
 
@@ -63,9 +64,7 @@ async def plot(
 
 @router.get("/web_search")
 async def web_search(
-    provider: str = Query(
-        ..., description="Search engine name, such as google, bing, etc."
-    ),
+    provider: str = Query(..., description="Search engine name, such as google, bing, etc."),
     kw: str = Query(..., description="Search keyword"),
     page: int = Query(1, description="Page number, default is 1"),
     number: int = Query(10, description="Number of requests, default is 10"),
@@ -94,9 +93,7 @@ async def web_search(
         elif provider == "baidu_news":
             time_period = ""
         elif provider == "google":
-            time_period = (
-                f"qdr:{time_period[0]}"  # day -> d, week -> w, month -> m, year -> y
-            )
+            time_period = f"qdr:{time_period[0]}"  # day -> d, week -> w, month -> m, year -> y
         elif provider == "google_news":
             time_period = f"qdr:{time_period[0]}"
         elif provider == "bing":
@@ -110,9 +107,7 @@ async def web_search(
                 time_period = 'ex1:"ez5"'
     try:
         search_tool = SearchTool()
-        results = await search_tool.execute(
-            provider=provider, kw=kw, page=page, number=number, time_period=time_period
-        )
+        results = await search_tool.execute(provider=provider, kw=kw, page=page, number=number, time_period=time_period)
         return success(data=results if results else [])
     except Exception as e:
         return fail(message=str(e), status_code=status.HTTP_500_INTERNAL_SERVER_ERROR)
@@ -183,9 +178,7 @@ async def web_crawler(
         # Validate URL format
         parsed_url = urlparse(decoded_url)
         if not all([parsed_url.scheme, parsed_url.netloc]):
-            raise HTTPException(
-                status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid URL format"
-            )
+            raise HTTPException(status_code=status.HTTP_400_BAD_REQUEST, detail="Invalid URL format")
 
         crawl_tool = CrawlTool()
         results = await crawl_tool.execute(url=decoded_url, format=format)
@@ -239,8 +232,8 @@ if __name__ == "__main__":
         signal.signal(sig, lambda s, f: signal_handler())
 
     # Configure and start server
-    config = uvicorn.Config(
-        app, host=config.server_host, port=config.server_port, loop="asyncio"
-    )
+    host = os.getenv("CS_SERVER_HOST", config.server_host)
+    port = os.getenv("CS_SERVER_PORT", config.server_port)
+    config = uvicorn.Config(app, host=host, port=port, loop="asyncio")
     server = uvicorn.Server(config)
     server.run()

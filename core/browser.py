@@ -15,12 +15,8 @@ class DynamicBrowserPool:
 
     def __init__(self):
         # min size pool
-        self.min_size = int(
-            os.getenv("BROWSER_POOL_MIN_SIZE", config.browser_pool_min_size)
-        )
-        self.max_size = int(
-            os.getenv("BROWSER_POOL_MAX_SIZE", config.browser_pool_max_size)
-        )
+        self.min_size = int(os.getenv("CS_BROWSER_POOL_MIN_SIZE", config.browser_pool_min_size))
+        self.max_size = int(os.getenv("CS_BROWSER_POOL_MAX_SIZE", config.browser_pool_max_size))
         self.idle_timeout = timedelta(seconds=300)  # Idle instance timeout
 
         # pool status
@@ -32,19 +28,17 @@ class DynamicBrowserPool:
         self._cleanup_task = None  # Background cleanup task
 
         # health check url
-        self.health_check_url = (
-            "http://" + config.server_host + ":" + str(config.server_port) + "/ping"
-        )
+        self.health_check_url = "http://" + config.server_host + ":" + str(config.server_port) + "/ping"
         # browser config
-        proxy = os.getenv("PROXY", config.proxy)
+        proxy = os.getenv("CS_PROXY", config.proxy)
         self.browser_config = BrowserConfig(
             browser_type=os.getenv("BROWSER_TYPE", config.browser_type),
             headless=os.getenv("HEADLESS", config.headless) == "true",
-            user_agent=os.getenv("USER_AGENT", config.user_agent),
-            user_agent_mode=os.getenv("USER_AGENT_MODE", config.user_agent_mode),
+            user_agent=os.getenv("CS_USER_AGENT", config.user_agent),
+            user_agent_mode=os.getenv("CS_USER_AGENT_MODE", config.user_agent_mode),
             proxy=proxy,
             proxy_config=config.proxy_config if not proxy else None,
-            user_data_dir=os.getenv("USER_DATA_DIR", config.user_data_dir),
+            user_data_dir=os.getenv("CS_USER_DATA_DIR", config.user_data_dir),
             text_mode=True,
             light_mode=True,
             viewport_width=1080,
@@ -106,9 +100,7 @@ class DynamicBrowserPool:
         crawler = AsyncWebCrawler(config=self.browser_config)
         await crawler.start()
         self._active_count += 1
-        logger.debug(
-            f"Created new browser instance. Total active: {self._active_count}"
-        )
+        logger.debug(f"Created new browser instance. Total active: {self._active_count}")
         return crawler
 
     async def _destroy_crawler(self, crawler: AsyncWebCrawler):
@@ -116,9 +108,7 @@ class DynamicBrowserPool:
         try:
             await crawler.close()
             self._active_count -= 1
-            logger.debug(
-                f"Destroyed browser instance. Total active: {self._active_count}"
-            )
+            logger.debug(f"Destroyed browser instance. Total active: {self._active_count}")
         except Exception as e:
             logger.error(f"Error destroying crawler: {e}")
 
@@ -145,9 +135,7 @@ class DynamicBrowserPool:
                 # Cleanup idle timeout instances
                 for crawler in temp:
                     last_used = self._last_used.get(crawler, now)
-                    if (
-                        now - last_used
-                    ) > self.idle_timeout and self._active_count > self.min_size:
+                    if (now - last_used) > self.idle_timeout and self._active_count > self.min_size:
                         await self._destroy_crawler(crawler)
                     else:
                         await self.pool.put(crawler)  # Re-put back to pool

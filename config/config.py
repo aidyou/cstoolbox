@@ -1,4 +1,4 @@
-# Region settings (e.g., "cn", "com", "uk"). Default: "cn".
+# Region settings (e.g., "cn", "com", "uk"). Default: "com".
 region = "com"
 
 # Proxy server URL (e.g., "http://username:password@proxy:port"). If None, no proxy is used.

@@ -25,9 +25,9 @@ This project is open-sourced under the [MIT License](LICENSE). You are free to u
 # Quick start
 docker run -d \
   -p 12321:12321 \
-  -e BROWSER_POOL_MIN_SIZE=2 \
-  -e BROWSER_POOL_MAX_SIZE=10 \
-  -e REGION=com \
+  -e CS_BROWSER_POOL_MIN_SIZE=2 \
+  -e CS_BROWSER_POOL_MAX_SIZE=10 \
+  -e CS_REGION=com \
   insuns/cstoolbox:latest
 ```
 
@@ -42,24 +42,28 @@ services:
     working_dir: /app
     command: ["python", "api.py"]
     environment:
+      # The port used by the server. If not defined, the default port is 12321.
+      # - CS_SERVER_PORT=12321
+      #
       # The minimum thread pool created when the browser starts. Enabling the thread pool can accelerate the data crawling speed.
-      - BROWSER_POOL_MIN_SIZE = 2
+      - CS_BROWSER_POOL_MIN_SIZE = 2
       # The maximum thread pool size allowed for the browser
-      - BROWSER_POOL_MAX_SIZE = 10
-      # your proxy server
-      # - PROXY=http://127.0.0.1:15154
-      # region for search engine
-      - REGION=com
+      - CS_BROWSER_POOL_MAX_SIZE = 10
+      # your proxy server for browser
+      # - CS_PROXY=http://127.0.0.1:15154
+      #
+      # region for search engine, com, cn, us, etc. default: com
+      # - CS_REGION=com
       #
       # define browser user agent
-      # - USER_AGENT = ''
+      # - CS_USER_AGENT = ''
       #
       # define user agent mode, can be "random" or None, If None, use the provided user_agent as-is. Default: None.
-      # - USER_AGENT_MODE = None
+      # - CS_USER_AGENT_MODE = None
       #
       # The directory used to store browser data. Usually, it does not need to be defined.
       # If you define an address, it is recommended to mount the local directory.
-      # - USER_DATA_DIR = '/path/to/user/data/dir'
+      # - CS_USER_DATA_DIR = '/path/to/user/data/dir'
     restart: always
     ports:
       - "127.0.0.1:12321:12321"

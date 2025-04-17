@@ -11,7 +11,6 @@ async def main():
     browser_config = BrowserConfig(
         # headless=True,
         disable_security=True,
-        proxy={"server": "http://127.0.0.1:15154"},
         # chrome_instance_path="/Applications/Brave Browser.app/Contents/MacOS/Brave Browser",
     )
     browser = Browser(config=browser_config)

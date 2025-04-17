@@ -101,13 +101,9 @@ class SearchExtractor:
 
         self.config, self.schema = self._load_provider_data(provider)
 
-    def _load_provider_data(
-        self, provider: str
-    ) -> tuple[SearchProviderConfig, ExtractSchema]:
+    def _load_provider_data(self, provider: str) -> tuple[SearchProviderConfig, ExtractSchema]:
         """Load provider configuration and schema from JSON file"""
-        config_path = (
-            Path(global_config.server_root) / "schema" / "search" / f"{provider}.json"
-        )
+        config_path = Path(global_config.server_root) / "schema" / "search" / f"{provider}.json"
         if not config_path.exists():
             logger.error(f"Configuration file not found: '{config_path}'")
             raise ValueError(f"Configuration file not found for provider '{provider}'")
@@ -122,13 +118,9 @@ class SearchExtractor:
             return cfg.config, cfg.schema
 
         except (json.JSONDecodeError, ValidationError) as e:
-            raise ValueError(
-                f"Invalid configuration file for provider '{provider}': {e}"
-            )
+            raise ValueError(f"Invalid configuration file for provider '{provider}': {e}")
 
-    def _get_search_url(
-        self, kw: str, page: int = 1, number: int = 10, time_period: str = ""
-    ) -> str:
+    def _get_search_url(self, kw: str, page: int = 1, number: int = 10, time_period: str = "") -> str:
         """Generate search URL with given parameters"""
         encoded_kw = quote(kw)
 
@@ -154,7 +146,7 @@ class SearchExtractor:
         params[param_name] = page_value
 
         # get base URL
-        region = os.getenv("REGION", global_config.region)
+        region = os.getenv("CS_REGION", global_config.region)
         base_url = global_config.region_urls.get(self.provider, {}).get(region)
         if not base_url:
             base_url = global_config.region_urls[self.provider]["com"]
@@ -162,9 +154,7 @@ class SearchExtractor:
         path = self.config.url_template.format(**params)
         return f"{base_url.rstrip('/')}{path}"
 
-    async def extract_results(
-        self, kw: str, page: int = 1, number: int = 10, time_period: str = ""
-    ) -> Optional[str]:
+    async def extract_results(self, kw: str, page: int = 1, number: int = 10, time_period: str = "") -> Optional[str]:
         """Extract search results using crawl4ai"""
         # get max results per page
         max_per_page = min(number, getattr(self.config, "max_results_per_page", 10))
@@ -192,9 +182,7 @@ class SearchExtractor:
             wait_until="domcontentloaded",
             wait_for_images=False,
             wait_for=self.config.wait_for,
-            page_timeout=(
-                30000 if self.config.page_timeout == 0 else self.config.page_timeout
-            ),
+            page_timeout=(30000 if self.config.page_timeout == 0 else self.config.page_timeout),
             cache_mode=CacheMode.DISABLED,
             extraction_strategy=extraction_strategy,
             verbose=False,
@@ -250,9 +238,7 @@ class SearchExtractor:
             if page_urls:
                 url = page_urls.pop(0)
             else:
-                url = self._get_search_url(
-                    kw, current_offset // max_per_page + 1, max_per_page, time_period
-                )
+                url = self._get_search_url(kw, current_offset // max_per_page + 1, max_per_page, time_period)
             logger.info("search url: %s", url)
 
             results = await crawler.arun(
@@ -389,15 +375,11 @@ class SearchExtractor:
                         results = json.loads(results.extracted_content)
                         all_results.extend(results)
                     except:
-                        logger.error(
-                            "Error parsing JSON: %s", results.extracted_content
-                        )
+                        logger.error("Error parsing JSON: %s", results.extracted_content)
                         continue
 
         return all_results
 
-    async def search(
-        self, kw: str, page: int = 1, number: int = 10, time_period: str = ""
-    ) -> List[SearchResult]:
+    async def search(self, kw: str, page: int = 1, number: int = 10, time_period: str = "") -> List[SearchResult]:
         """Convenience method to perform search and extract results"""
         return await self.extract_results(kw, page, number, time_period)
