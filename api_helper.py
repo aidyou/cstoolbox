@@ -4,6 +4,10 @@ from fastapi import status
 from fastapi.responses import JSONResponse
 from datetime import datetime, timedelta
 
+from core.browser import browser_pool
+
+shutdown_event = asyncio.Event()
+
 
 def fail(
     message: str,

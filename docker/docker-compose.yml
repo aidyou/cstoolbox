@@ -1,6 +1,7 @@
 services:
   crawler:
     image: insuns/cstoolbox:latest
+    container_name: cstb
     working_dir: /app
     command: ["python", "api.py"]
     environment:
@@ -11,8 +12,10 @@ services:
       - CS_BROWSER_POOL_MIN_SIZE = 2
       # The maximum thread pool size allowed for the browser
       - CS_BROWSER_POOL_MAX_SIZE = 10
+      #
       # you proxy server
-      # - CS_PROXY=http://127.0.0.1:15154
+      - CS_PROXY=http://host.docker.internal:15154
+      #
       # region for search engine
       - CS_REGION=com
       #
@@ -30,4 +33,6 @@ services:
       # - CS_LOG_LEVEL = 'INFO'
     restart: always
     ports:
-      - "127.0.0.1:12321:12321"
+      - "127.0.0.1:12322:12321"
+    volumes:
+      - ../:/app

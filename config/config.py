@@ -5,7 +5,7 @@ from pathlib import Path
 region = os.getenv("CS_REGION", "com")
 
 # Proxy server URL (e.g., "http://username:password@proxy:port"). If None, no proxy is used.
-proxy = os.getenv("CS_PROXY")
+proxy = os.getenv("CS_PROXY", "http://host.docker.internal:15154")
 
 # server host
 server_host = os.getenv("CS_SERVER_HOST", "127.0.0.1")

@@ -24,6 +24,8 @@
 ```bash
 # 快速启动
 docker run -d \
+  --name cstb \
+  --restart always \
   -p 12321:12321 \
   -e CS_BROWSER_POOL_MIN_SIZE=2 \
   -e CS_BROWSER_POOL_MAX_SIZE=10 \
@@ -39,6 +41,7 @@ docker-compose.yml
 services:
   crawler:
     image: insuns/cstoolbox:latest
+    container_name: cstb
     working_dir: /app
     command: ["python", "api.py"]
     environment:

@@ -14,6 +14,8 @@ class DynamicBrowserPool:
     """Dynamic browser pool, supports auto expansion/shrinkage and health check"""
 
     def __init__(self):
+        logger.debug(f"Proxy: {config.proxy}")
+
         # min size pool
         self.min_size = int(config.browser_pool_min_size)
         self.max_size = int(config.browser_pool_max_size)
@@ -29,7 +31,6 @@ class DynamicBrowserPool:
 
         # health check url
         self.health_check_url = "http://127.0.0.1:" + str(config.server_port) + "/ping"
-        logger.debug(f"Proxy: {config.proxy}")
 
         # browser config
         self.browser_config = BrowserConfig(
