@@ -146,8 +146,7 @@ class SearchExtractor:
         params[param_name] = page_value
 
         # get base URL
-        region = os.getenv("CS_REGION", global_config.region)
-        base_url = global_config.region_urls.get(self.provider, {}).get(region)
+        base_url = global_config.region_urls.get(self.provider, {}).get(global_config.region)
         if not base_url:
             base_url = global_config.region_urls[self.provider]["com"]
 

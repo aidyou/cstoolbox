@@ -64,6 +64,10 @@ services:
       # The directory used to store browser data. Usually, it does not need to be defined.
       # If you define an address, it is recommended to mount the local directory.
       # - CS_USER_DATA_DIR = '/path/to/user/data/dir'
+      #
+      # log level, can be 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
+      # - CS_LOG_LEVEL = 'INFO'
+
     restart: always
     ports:
       - "127.0.0.1:12321:12321"

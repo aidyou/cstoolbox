@@ -15,8 +15,8 @@ class DynamicBrowserPool:
 
     def __init__(self):
         # min size pool
-        self.min_size = int(os.getenv("CS_BROWSER_POOL_MIN_SIZE", config.browser_pool_min_size))
-        self.max_size = int(os.getenv("CS_BROWSER_POOL_MAX_SIZE", config.browser_pool_max_size))
+        self.min_size = int(config.browser_pool_min_size)
+        self.max_size = int(config.browser_pool_max_size)
         self.idle_timeout = timedelta(seconds=300)  # Idle instance timeout
 
         # pool status
@@ -28,17 +28,17 @@ class DynamicBrowserPool:
         self._cleanup_task = None  # Background cleanup task
 
         # health check url
-        self.health_check_url = "http://" + config.server_host + ":" + str(config.server_port) + "/ping"
+        self.health_check_url = "http://127.0.0.1:" + str(config.server_port) + "/ping"
+        logger.debug(f"Proxy: {config.proxy}")
+
         # browser config
-        proxy = os.getenv("CS_PROXY", config.proxy)
         self.browser_config = BrowserConfig(
-            browser_type=os.getenv("BROWSER_TYPE", config.browser_type),
-            headless=os.getenv("HEADLESS", config.headless) == "true",
-            user_agent=os.getenv("CS_USER_AGENT", config.user_agent),
-            user_agent_mode=os.getenv("CS_USER_AGENT_MODE", config.user_agent_mode),
-            proxy=proxy,
-            proxy_config=config.proxy_config if not proxy else None,
-            user_data_dir=os.getenv("CS_USER_DATA_DIR", config.user_data_dir),
+            browser_type="chromium",
+            headless=config.headless == "true",
+            user_agent=config.user_agent,
+            user_agent_mode=config.user_agent_mode,
+            proxy=config.proxy,
+            user_data_dir=config.user_data_dir,
             text_mode=True,
             light_mode=True,
             viewport_width=1080,

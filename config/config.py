@@ -1,31 +1,29 @@
+import os
+from pathlib import Path
+
 # Region settings (e.g., "cn", "com", "uk"). Default: "com".
-region = "com"
+region = os.getenv("CS_REGION", "com")
 
 # Proxy server URL (e.g., "http://username:password@proxy:port"). If None, no proxy is used.
-proxy = ""
-
-# proxy config: {"server": "...", "username": "..."}
-# proxy 如果不为空，则本项设置不会被用到
-proxy_config = None
+proxy = os.getenv("CS_PROXY")
 
 # server host
-server_host = "127.0.0.1"
+server_host = os.getenv("CS_SERVER_HOST", "127.0.0.1")
 
 # server port
-server_port = 12321
+server_port = int(os.getenv("CS_SERVER_PORT", 12321))
 
 # min size of crawl pool
-browser_pool_min_size = 2
+browser_pool_min_size = os.getenv("CS_BROWSER_POOL_MIN_SIZE", 2)
 
 # max size of crawl pool
-browser_pool_max_size = 10
+browser_pool_max_size = os.getenv("CS_BROWSER_POOL_MAX_SIZE", 10)
 
 #  user_data_dir (str or None): Path to a user data directory for persistent sessions.
 # If None, a temporary directory may be used. Default: None.
-user_data_dir = None
+user_data_dir = os.getenv("CS_USER_DATA_DIR")
 
-browser_type = "chromium"
-headless = "true"
+headless = os.getenv("CS_HEADLESS", "true")
 
 # Region specific base URLs
 region_urls = {
@@ -70,15 +68,12 @@ region_urls = {
 }
 
 # Logging level (e.g., "DEBUG", "INFO", "WARNING", "ERROR", "CRITICAL"). Default: "INFO".
-log_level = "INFO"
+log_level = os.getenv("CS_LOG_LEVEL", "INFO")
 
 # Custom User-Agent string to use.
-user_agent = "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/133.0.0.0 Safari/537.36"
+user_agent = os.getenv("CS_USER_AGENT")
 
 # Mode for generating the user agent (e.g., "random"). If None, use the provided user_agent as-is. Default: None.
-user_agent_mode = None
-
-# Server root directory
-from pathlib import Path
+user_agent_mode = os.getenv("CS_USER_AGENT_MODE", "random")
 
 server_root = Path(__file__).resolve().parent.parent

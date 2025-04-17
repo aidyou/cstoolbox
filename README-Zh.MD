@@ -42,14 +42,18 @@ services:
     working_dir: /app
     command: ["python", "api.py"]
     environment:
+      # The port used by the server. If not defined, the default port is 12321.
+      # - CS_SERVER_PORT=12321
+      #
       # The minimum thread pool created when the browser starts. Enabling the thread pool can accelerate the data crawling speed.
       - CS_BROWSER_POOL_MIN_SIZE = 2
       # The maximum thread pool size allowed for the browser
       - CS_BROWSER_POOL_MAX_SIZE = 10
-      # you proxy server
-      # - PROXY=http://127.0.0.1:15154
-      # region for search engine
-      - CS_REGION=com
+      # your proxy server for browser
+      # - CS_PROXY=http://127.0.0.1:15154
+      #
+      # region for search engine, com, cn, us, etc. default: com
+      # - CS_REGION=com
       #
       # define browser user agent
       # - CS_USER_AGENT = ''
@@ -60,6 +64,10 @@ services:
       # The directory used to store browser data. Usually, it does not need to be defined.
       # If you define an address, it is recommended to mount the local directory.
       # - CS_USER_DATA_DIR = '/path/to/user/data/dir'
+      #
+      # log level, can be 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
+      # - CS_LOG_LEVEL = 'INFO'
+
     restart: always
     ports:
       - "127.0.0.1:12321:12321"

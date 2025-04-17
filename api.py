@@ -232,8 +232,6 @@ if __name__ == "__main__":
         signal.signal(sig, lambda s, f: signal_handler())
 
     # Configure and start server
-    host = os.getenv("CS_SERVER_HOST", config.server_host)
-    port = os.getenv("CS_SERVER_PORT", config.server_port)
-    config = uvicorn.Config(app, host=host, port=port, loop="asyncio")
+    config = uvicorn.Config(app, host=config.server_host, port=config.server_port, loop="asyncio")
     server = uvicorn.Server(config)
     server.run()
