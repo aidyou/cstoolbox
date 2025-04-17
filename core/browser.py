@@ -14,7 +14,7 @@ class DynamicBrowserPool:
     """Dynamic browser pool, supports auto expansion/shrinkage and health check"""
 
     def __init__(self):
-        logger.debug(f"Proxy: {config.proxy}")
+        logger.info(f"Browser Proxy: {config.proxy}")
 
         # min size pool
         self.min_size = int(config.browser_pool_min_size)
@@ -35,7 +35,7 @@ class DynamicBrowserPool:
         # browser config
         self.browser_config = BrowserConfig(
             browser_type="chromium",
-            headless=config.headless == "true",
+            headless=config.headless.lower() == "true",
             user_agent=config.user_agent,
             user_agent_mode=config.user_agent_mode,
             proxy=config.proxy,

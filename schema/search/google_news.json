@@ -4,7 +4,7 @@
     "url_template": "/search?q={kw}&ie=UTF-8&tbm=nws&newwindow=1&start={offset}&num={number}&tbs={time_period}",
     "pagination_type": "offset",
     "pagination_param": "offset",
-    "page_timeout": 60000,
+    "page_timeout": 15000,
     "max_results_per_page": 25,
     "wait_for": "#rcnt"
   },

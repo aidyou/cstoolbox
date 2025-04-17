@@ -176,6 +176,8 @@ class SearchExtractor:
                 ],
             }
         )
+        logger.info("screenshot: %s", global_config.screenshot)
+        logger.info("CS_SCREENSHOT: %s", os.getenv("CS_SCREENSHOT"))
 
         crawler_config = CrawlerRunConfig(
             wait_until="domcontentloaded",
@@ -185,12 +187,11 @@ class SearchExtractor:
             cache_mode=CacheMode.DISABLED,
             extraction_strategy=extraction_strategy,
             verbose=False,
-            screenshot=False,  ## production environment must be disabled
+            screenshot=global_config.screenshot.lower() == "true",  ## production environment must be disabled
             remove_forms=True,
             process_iframes=False,
             excluded_tags=["script", "style", "iframe", "img", "video", "audio"],
         )
-        # TODO: duckduckgo temporarily can only get the first page
 
         async with browser_pool.get_crawler() as crawler:
             if self.config.click_config:

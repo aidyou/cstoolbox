@@ -5,7 +5,7 @@ from pathlib import Path
 region = os.getenv("CS_REGION", "com")
 
 # Proxy server URL (e.g., "http://username:password@proxy:port"). If None, no proxy is used.
-proxy = os.getenv("CS_PROXY", "http://host.docker.internal:15154")
+proxy = os.getenv("CS_PROXY")
 
 # server host
 server_host = os.getenv("CS_SERVER_HOST", "127.0.0.1")
@@ -71,9 +71,14 @@ region_urls = {
 log_level = os.getenv("CS_LOG_LEVEL", "INFO")
 
 # Custom User-Agent string to use.
-user_agent = os.getenv("CS_USER_AGENT")
+user_agent = os.getenv(
+    "CS_USER_AGENT", "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 Chrome/116.0.0.0 Safari/537.36"
+)
 
 # Mode for generating the user agent (e.g., "random"). If None, use the provided user_agent as-is. Default: None.
-user_agent_mode = os.getenv("CS_USER_AGENT_MODE", "random")
+user_agent_mode = os.getenv("CS_USER_AGENT_MODE")
+
+# screenshot config for playwright, true/false
+screenshot = os.getenv("CS_SCREENSHOT", "false")
 
 server_root = Path(__file__).resolve().parent.parent

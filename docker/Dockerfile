@@ -62,7 +62,8 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libxkbcommon0 \
     libpango-1.0-0 \
     libcairo2 \
-    libasound2 && \
+    libasound2 \
+    fonts-wqy-zenhei && \
     rm -rf /var/lib/apt/lists/*
 
 COPY . .

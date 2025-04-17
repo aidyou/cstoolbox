@@ -89,7 +89,7 @@ class DataExtractor:
                         }
                     ),
                     verbose=False,
-                    screenshot=global_config.log_level.lower() == "debug",
+                    screenshot=global_config.screenshot.lower() == "true",
                     remove_forms=True,
                     process_iframes=False,
                     excluded_tags=[

@@ -70,6 +70,9 @@ services:
       #
       # log level, can be 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
       # - CS_LOG_LEVEL = 'INFO'
+      #
+      # The screenshot config for playwright. if true, the screenshot will be saved in logs dir.
+      # - CS_SCREENSHOT = true
 
     restart: always
     ports:
