@@ -30,6 +30,8 @@ docker run -d \
   -e CS_BROWSER_POOL_MIN_SIZE=2 \
   -e CS_BROWSER_POOL_MAX_SIZE=10 \
   -e CS_REGION=com \
+  -e TZ=Asia/Shanghai \
+  -e CS_BROWSER_LANG=zh-CN \
   insuns/cstoolbox:latest
 ```
 
@@ -45,6 +47,12 @@ services:
     working_dir: /app
     command: ["python", "api.py"]
     environment:
+      # 时区设置，你可以改为你自己的时区
+      - TZ=Asia/Shanghai
+      #
+      # Set the browser language, default is en-US, you can change it to your own language.
+      - CS_BROWSER_LANG=zh-CN
+      #
       # The port used by the server. If not defined, the default port is 12321.
       # - CS_SERVER_PORT=12321
       #
@@ -53,7 +61,7 @@ services:
       # The maximum thread pool size allowed for the browser
       - CS_BROWSER_POOL_MAX_SIZE = 10
       # your proxy server for browser
-      # - CS_PROXY=http://127.0.0.1:15154
+      # - CS_PROXY=http://host.docker.internal:15154
       #
       # region for search engine, com, cn, us, etc. default: com
       # - CS_REGION=com
@@ -121,7 +129,7 @@ python api.py
 import requests
 
 # 网页搜索
-response = requests.post("http://localhost:12321/chp/web_search", json={
+response = requests.get("http://localhost:12321/chp/web_search", params={
     "provider": "google",
     "kw": "人工智能",
     "page": 1,

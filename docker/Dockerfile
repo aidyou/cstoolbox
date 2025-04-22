@@ -39,6 +39,7 @@ RUN pip install --upgrade pip && \
 FROM python:3.10-slim
 WORKDIR /app
 ENV CS_SERVER_HOST=0.0.0.0
+ENV NODE_OPTIONS="--max-old-space-size=2048"
 
 COPY --from=builder /etc/apt/sources.list.d/debian.sources /etc/apt/sources.list.d/debian.sources
 COPY --from=builder /usr/local/lib/python3.10/site-packages /usr/local/lib/python3.10/site-packages

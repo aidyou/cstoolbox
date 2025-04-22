@@ -176,8 +176,6 @@ class SearchExtractor:
                 ],
             }
         )
-        logger.info("screenshot: %s", global_config.screenshot)
-        logger.info("CS_SCREENSHOT: %s", os.getenv("CS_SCREENSHOT"))
 
         crawler_config = CrawlerRunConfig(
             wait_until="domcontentloaded",

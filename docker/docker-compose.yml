@@ -1,11 +1,17 @@
 services:
   cstoolbox:
-    image: insuns/cstoolbox:latest
+    image: cstoolbox:latest
     container_name: cstb
     working_dir: /app
     command: ["python", "api.py"]
     environment:
-       # The port used by the server. If not defined, the default port is 12321.
+      # Set the timezone to Asia/Shanghai, you can change it to your own timezone.
+      - TZ=Asia/Shanghai
+      #
+      # Set the browser language, default is en-US, you can change it to your own language.
+      - CS_BROWSER_LANG=zh-CN
+      #
+      # The port used by the server. If not defined, the default port is 12321.
       # - CS_SERVER_PORT=12321
       #
       # The minimum thread pool created when the browser starts. Enabling the thread pool can accelerate the data crawling speed.
@@ -15,7 +21,7 @@ services:
       # - CS_BROWSER_POOL_MAX_SIZE=10
       #
       # you proxy server
-      - CS_PROXY=http://host.docker.internal:15154
+      # - CS_PROXY=http://host.docker.internal:15154
       #
       # region for search engine, cn/com/hk/uk/jp etc. default: com
       # - CS_REGION=com
@@ -34,7 +40,9 @@ services:
       - CS_LOG_LEVEL=DEBUG
       #
       # The screenshot config for playwright. if true, the screenshot will be saved in logs dir.
-      - CS_SCREENSHOT=True
+      # - CS_SCREENSHOT=True
     restart: always
     ports:
       - "127.0.0.1:12322:12321"
+    volumes:
+      - "../:/app"
