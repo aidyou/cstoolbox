@@ -1,0 +1,42 @@
+{
+  "config": {
+    "name": "duckduckgo",
+    "url_template": "/?t=h_&q={kw}&ia=web&s={offset}",
+    "pagination_type": "offset",
+    "pagination_param": "offset",
+    "wait_for": "section[data-area='mainline']",
+    "max_results_per_page": 10,
+    "page_timeout": 60000,
+    "js_code": "(async () => {{ const target = {number}; let current = 10; while(current < target) {{ const btn = document.querySelector('#more-results'); if (!btn) break; const itemsBefore = document.querySelectorAll('section[data-area=\"mainline\"]>ol>li[data-layout=\"organic\"]').length; btn.scrollIntoView(); btn.click(); await new Promise(r => setTimeout(r, 2000)); const itemsAfter = document.querySelectorAll('section[data-area=\"mainline\"]>ol>li[data-layout=\"organic\"]').length; if (itemsAfter <= itemsBefore) break; current = itemsAfter; }} return current; }})()",
+    "click_config": [{
+      "selector": "#more-results",
+      "wait": 5000
+    }]
+  },
+  "selectors": {
+    "base_selector": "section[data-area='mainline']>ol>li[data-layout='organic']",
+    "fields": [
+      {
+        "name": "sitename",
+        "selector": "article > div:nth-child(1) > div:nth-child(2) > p",
+        "type": "text"
+      },
+      {
+        "name": "title",
+        "selector": "article > div:nth-child(3) > h2 > a > span",
+        "type": "text"
+      },
+      {
+        "name": "url",
+        "selector": "article > div:nth-child(3) > h2 > a",
+        "type": "attribute",
+        "attribute": "href"
+      },
+      {
+        "name": "summary",
+        "selector": "article > div:nth-child(4) > div > div > span > span",
+        "type": "text"
+      }
+    ]
+  }
+}

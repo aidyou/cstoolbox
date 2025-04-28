@@ -1,0 +1,70 @@
+name: Build with UV and Publish with UVX
+
+on:
+  push:
+    tags:
+      - 'v*' # Trigger on tag pushes like v1.0.0, v2.1 etc.
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag (e.g. v1.0.0 or latest)'
+        required: true
+        default: 'latest' # Default value for manual trigger
+
+jobs:
+  build-and-publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read # Needed for checkout
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+
+      # Install uv (the build tool) using the recommended installer
+      - name: Install uv
+        run: curl -LsSf https://astral.sh/uv/install.sh | sh
+        # Ensure uv is in the PATH for subsequent steps
+        # The installer script usually adds it, but explicitly adding doesn't hurt
+      - name: Add uv to PATH
+        run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
+
+      - name: Extract version from tag or input
+        id: extract_version
+        run: |
+          if [ "${{ github.event_name }}" = "workflow_dispatch" ]; then
+            VERSION=${{ github.event.inputs.version }}
+          elif [[ "${{ github.ref }}" == refs/tags/v* ]]; then
+            VERSION=${GITHUB_REF#refs/tags/}
+          else
+            echo "Warning: Could not determine version from trigger. Using 'latest'."
+            VERSION="latest"
+          fi
+          # Optional: remove 'v' prefix if uvx publish needs pure version number
+          # VERSION=${VERSION#v}
+          echo "Determined version: ${VERSION}"
+          echo "version=${VERSION}" >> $GITHUB_OUTPUT
+
+      # Build the package using uv build
+      - name: Build package with uv
+        env:
+          API_TOKEN: ${{ secrets.PYPI_TOKEN }}
+          TEST_API_TOKEN: ${{ secrets.TEST_PYPI_TOKEN }}
+        run: |
+          uv build
+          echo "Publishing package"
+          uv publish --index pypi --token $API_TOKEN
+
+      # Add new step for test environment
+      - name: Publish to test server
+        if: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.version != 'latest' }}
+        env:
+          TEST_API_TOKEN: ${{ secrets.TEST_PYPI_TOKEN }}
+        run: |
+          echo "Publishing to test server"
+          uv publish --index testpypi --token $TEST_API_TOKEN

@@ -1,0 +1,71 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "cstoolbox"
+dynamic = ["version"]
+description = "An extension toolkit for ChatSpeed, providing web search, web content crawling, and chart generation capabilities."
+readme = "README.MD"
+requires-python = ">=3.10"
+dependencies = [
+    "aiohttp>=3.11.18",
+    "appdirs>=1.4.4",
+    "lxml>=5.3.2",
+    "markdownify>=1.1.0",
+    "matplotlib>=3.9.4",
+    "mcp[cli]>=1.6.0",
+    "pdfplumber>=0.11.6",
+    "playwright>=1.51.0",
+    "pydantic>=2.11.3",
+]
+authors = [
+    { name = "心澄", email = "xc@aidyou.ai" },
+]
+
+license = { text = "MIT" }
+
+[project.urls]
+Homepage = "https://github.com/aidyou/cstoolbox"
+Repository = "https://github.com/aidyou/cstoolbox"
+
+
+[project.scripts]
+cstoolbox = "cstoolbox.main:main"
+cstoolbox-server = "cstoolbox.main:main"
+
+[project.optional-dependencies]
+dev = []
+
+# The `__version__` variable will be update to project.version
+[tool.hatch.version]
+path = "src/cstoolbox/__version__.py"
+
+# [tool.hatch.build.targets.wheel]
+# include = [
+#     "src/cstoolbox",
+# ]
+[tool.hatch.build.targets.wheel]
+packages = ["src/cstoolbox"]
+
+
+# run: `uv publish --index pypi --token $PYPI_TOKEN`
+[[tool.uv.index]]
+name = "pypi"
+url = "https://pypi.org/simple/"
+publish-url = "https://upload.pypi.org/legacy/"
+explicit = true
+
+# run: `uv publish --index testpypi --token $TEST_PYPI_TOKEN`
+# test: `uv pip install --index-url https://test.pypi.org/simple/ --extra-index-url https://pypi.org/simple/ cstoolbox`
+[[tool.uv.index]]
+name = "testpypi"
+url = "https://test.pypi.org/simple/"
+publish-url = "https://test.pypi.org/legacy/"
+explicit = true
+
+[dependency-groups]
+dev = [
+    "fastapi>=0.115.12",
+    "hatch>=1.14.1",
+]

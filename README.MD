@@ -1,174 +1,238 @@
-# ChatSpeed Toolbox (CSToolbox)
+# CSToolbox (ChatSpeed Toolbox)
 
-[简体中文](README-Zh.MD) | English
+[简体中文](README.zh-CN.md) | English
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
-An extension toolkit for [ChatSpeed](https://github.com/aidyou/chatspeed), providing web search, web content crawling, and chart generation capabilities.
-
-## License
-
-This project is open-sourced under the [MIT License](LICENSE). You are free to use, modify, and distribute this software.
+CSToolbox is an extension toolkit for [ChatSpeed](https://github.com/aidyou/chatspeed). It provides features like web search, web content crawling, and chart generation via the MCP protocol.
 
 ## Features
 
 - 🔍 **Web Search** - Supports multiple search engines (Google, Bing, Baidu, etc.)
-- 🕷️ **Web Crawling** - Extracts structured content from web pages (supports Markdown/HTML formats)
-- 📊 **Chart Generation** - Quickly generates various data visualization charts, including line charts, bar charts, and pie charts
-- 📄 **PDF Processing** - Extracts text content from PDF documents
+- 🕷️ **Web Crawling** - Extracts structured content from web pages (Supports Markdown/HTML format)
+- 📊 **Chart Generation** - Quickly generates various data visualization charts, supporting line charts, bar charts, and pie charts
+- 📄 **PDF Processing** - Downloads documents from PDF URLs and extracts text content
 
-## Installation
+## How to Use
 
-### Docker Installation (Recommended)
+### MCP Client Configuration
 
-```bash
-# Quick start
-docker run -d \
-  --name cstb \
-  --restart always \
-  -p 12321:12321 \
-  -e CS_BROWSER_POOL_MIN_SIZE=2 \
-  -e CS_BROWSER_POOL_MAX_SIZE=10 \
-  -e CS_REGION=com \
-  -e TZ=Asia/Shanghai
-  -e CS_BROWSER_LANG=zh-CN \
-  insuns/cstoolbox:latest
+``` json
+{
+  "mcpServers": {
+    "cstoolbox": {
+      "command": "uvx",
+      "args": [
+        "cstoolbox"
+      ],
+      "env": {
+        "CS_LOG_LEVEL": "DEBUG",
+        "CS_LOG_DIR": "logs",
+        "CS_PROXY": "http://localhost:15154",
+        "CS_BROWSER_TZ": "Asia/Shanghai",
+        "CS_BROWSER_LANG": "zh-CN",
+        "CS_REGION": "com",
+        "CS_HEADLESS": "true",
+        "CS_USER_DATA_DIR": null,
+        "CS_BROWSER_TYPE": "chromium",
+        "CS_EXECUTABLE_PATH": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome"
+      }
+    }
+  }
+}
 ```
 
-### Or using docker-compose
+#### Environment Variable Descriptions
 
-docker-compose.yml
+- `CS_LOG_LEVEL`: Log level. Possible values are `DEBUG`, `INFO`, `WARNING`, `ERROR`, `CRITICAL`. Defaults to `INFO`.
+- `CS_LOG_DIR`: Log directory. Defaults to `logs`.
+- `CS_PROXY`: Proxy server address. A proxy is needed in some regions where search engines like `google.com` or `bing.com` are inaccessible. Additionally, some websites have regional restrictions and cannot be accessed without a proxy.
+- `CS_BROWSER_TZ`: Timezone. Defaults to `Etc/UTC`.
+- `CS_BROWSER_LANG`: Browser language. Defaults to `en-US`.
+- `CS_REGION`: Search engine region. Possible values include `com`, `cn`, `us`, `uk`, etc. Defaults to `com`.
+- `CS_HEADLESS`: Whether to enable headless mode. Defaults to `true`.
+- `CS_BROWSER_TYPE`: Browser type. Possible values are `chromium`, `firefox`, `webkit`. Defaults to `chromium`.
+- `CS_EXECUTABLE_PATH`: Browser executable file path. Defaults to empty. You can use this to specify the path to a browser already installed on your system. This allows leveraging the browser's existing state data (like login status, cookies, etc.). If you specify `CS_EXECUTABLE_PATH`, ensure it matches the `CS_BROWSER_TYPE`.
+- `CS_USER_DATA_DIR`: User data directory. If you specify `CS_EXECUTABLE_PATH`, it is recommended to set `CS_USER_DATA_DIR` to the parent directory of the browser's "Profile Path".
 
-```yaml
-services:
-  crawler:
-    image: insuns/cstoolbox:latest
-    container_name: cstb
-    working_dir: /app
-    command: ["python", "api.py"]
-    environment:
-      # Set the timezone to Asia/Shanghai, you can change it to your own timezone.
-      - TZ=Asia/Shanghai
-      #
-      # Set the browser language, default is en-US, you can change it to your own language.
-      - CS_BROWSER_LANG=zh-CN
-      #
-      # The port used by the server. If not defined, the default port is 12321.
-      # - CS_SERVER_PORT=12321
-      #
-      # The minimum thread pool created when the browser starts. Enabling the thread pool can accelerate the data crawling speed.
-      - CS_BROWSER_POOL_MIN_SIZE = 2
-      # The maximum thread pool size allowed for the browser
-      - CS_BROWSER_POOL_MAX_SIZE = 10
-      # your proxy server for browser
-      # - CS_PROXY=http://host.docker.internal:15154
-      #
-      # region for search engine, com, cn, us, etc. default: com
-      # - CS_REGION=com
-      #
-      # define browser user agent
-      # - CS_USER_AGENT = ''
-      #
-      # define user agent mode, can be "random" or None, If None, use the provided user_agent as-is. Default: None.
-      # - CS_USER_AGENT_MODE = None
-      #
-      # The directory used to store browser data. Usually, it does not need to be defined.
-      # If you define an address, it is recommended to mount the local directory.
-      # - CS_USER_DATA_DIR = '/path/to/user/data/dir'
-      #
-      # log level, can be 'DEBUG', 'INFO', 'WARNING', 'ERROR', 'CRITICAL'
-      # - CS_LOG_LEVEL = 'INFO'
-      #
-      # The screenshot config for playwright. if true, the screenshot will be saved in logs dir.
-      # - CS_SCREENSHOT = true
+#### How to find Chrome's Executable Path and Profile Path
 
-    restart: always
-    ports:
-      - "127.0.0.1:12321:12321"
+1. Open the Chrome browser.
+2. Enter `chrome://version/` in the address bar.
+3. On the page, you will find the "Executable Path". It will look similar to `/Applications/Google Chrome.app/Contents/MacOS/Google Chrome`. This is the path you should set for `CS_EXECUTABLE_PATH`.
+4. Find the 'Profile Path', which will look similar to /Users/xxx/Library/Application Support/Google/Chrome/Default. The value for CS_USER_DATA_DIR should be /Users/xxx/Library/Application Support/Google/Chrome (note: this path should exclude the final Default part).
+
+#### ⚠️ Important Notes
+
+- Ensure the proxy is correctly configured when using `google` or `bing` for web searches in certain regions.
+- It is best not to set `CS_EXECUTABLE_PATH` to the browser you are currently using, as this can cause conflicts. If you are used to using `google chrome`, you can install other Chromium-based browsers like [Edge](https://www.microsoft.com/en-us/edge/download) or [Brave](https://brave.com/download/). Conversely, if you are used to using the `edge` browser, it is highly recommended that you install [google chrome](https://www.google.com/intl/en_au/chrome/dr/download/).
+
+#### The recommend MCP configuration
+
+``` json
+{
+  "mcpServers": {
+    "cstoolbox": {
+      "command": "uvx",
+      "args": [
+        "cstoolbox"
+      ],
+      "env": {
+        "CS_PROXY": "http://{your-proxy-server}",
+        "CS_HEADLESS": "false",
+        "CS_BROWSER_TYPE": "chromium",
+        "CS_EXECUTABLE_PATH": "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome",
+        "CS_USER_DATA_DIR": "~/Library/Application Support/Google/Chrome"
+      }
+    }
+  }
+}
 ```
 
-Execute:
+### Python Usage Example
 
-```bash
-docker-compose up -d
-```
-
-### Conda Installation
-
-1. Clone source code repository:
-
-```bash
-git clone https://github.com/aidyou/cstoolbox.git
-cd cstoolbox
-```
-
-2. Create and activate conda environment:
-
-```bash
-conda create -n cstoolbox python=3.8
-conda activate cstoolbox
-```
-
-3. Install dependencies:
-
-```bash
-pip install -r requirements.txt
-```
-
-4. Start service:
-
-```bash
-python api.py
-```
-
-## API Usage
-
-### Example Calls
+For more Python usage examples, please refer to the `tests/mcp_client.py` file.
 
 ```python
-import requests
+from pathlib import Path
 
-# Web search
-response = requests.post("http://localhost:12321/chp/web_search", json={
-    "provider": "google",
-    "kw": "artificial intelligence",
-    "page": 1,
-    "number": 10
-})
+from mcp import ClientSession, StdioServerParameters, types
+from mcp.client.stdio import stdio_client
 
-# Web crawling
-response = requests.get("http://localhost:12321/chp/web_crawler", params={
-    "url": "https://example.com",
-    "format": "markdown"
-})
+project_root = Path(__file__).resolve().parent.parent
 
-# Chart generation
-response = requests.post("http://localhost:12321/chp/plot", json={
-    "plot_type": "bar",
-    "data": {"x": [1,2,3], "y": [4,5,6]},
-    "title": "Example Chart"
-})
+# Create server parameters for stdio connection
+server_params = StdioServerParameters(
+    command="python",
+    args=[f"{project_root}/src/cstoolbox/main.py"],  # Path to cstoolbox mcp main.py
+    env={
+        "CS_PROXY": "http://localhost:15154",
+        "CS_BROWSER_TZ": "Asia/Shanghai",
+        "CS_BROWSER_LANG": "zh-CN"
+    },
+)
 
-# Download and parse PDF
-response = requests.get("http://localhost:12321/chp/pdf", params={
-    "url": "https://domain.com/path/to/file.pdf"
-})
+
+# Optional: create a sampling callback
+async def handle_sampling_message(
+    message: types.CreateMessageRequestParams,
+) -> types.CreateMessageResult:
+    return types.CreateMessageResult(
+        role="assistant",
+        content=types.TextContent(
+            type="text",
+            text="Hello, world! from model",
+        ),
+        model="gpt-3.5-turbo",
+        stopReason="endTurn",
+    )
+
+
+async def run():
+    async with stdio_client(server_params) as (read, write):
+        async with ClientSession(read, write, sampling_callback=handle_sampling_message) as session:
+            # Initialize the connection
+            await session.initialize()
+
+            # List available tools
+            tools = await session.list_tools()
+
+            # Call a web search tool
+            result = await session.call_tool(
+                "web_search",
+                arguments={"provider": "bing", "kw": "deepseek r2", "number": 10, "page": 1, "time_period": "month"},
+            )
+            print(result)
+
+if __name__ == "__main__":
+    import asyncio
+
+    asyncio.run(run())
+
 ```
 
 ## Development
 
-```bash
-# Install dependencies
-pip install -r requirements.txt
+1. Clone the source code repository:
 
-# Start development server
-python api.py
-```
+    ```bash
+    git clone https://github.com/aidyou/cstoolbox.git
+    cd cstoolbox
+    ```
 
-## Future Plans
+2. Install uv
+    **macOS/Linux**
 
-The current version is transitional. Future versions will integrate with [Chatspeed](https://github.com/aidyou/chatspeed) to add MCP protocol support.
+    ```bash
+    curl -LsSf https://astral.sh/uv/install.sh | sh
+    ```
 
-### Protocol Upgrade to MCP
+    **Windows** Use `irm` to download and install:
 
-⚠️ Important Change: To enhance system performance and expandability, we plan to add MCP (Model Context Protocol) support in the next major version (v0.2). Existing APIs will remain unaffected, while new interfaces will fully adopt the MCP protocol.
+    ```bash
+    powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+    ```
+
+3. Create and activate a venv environment:
+
+    ```bash
+    uv venv --python=python3.12
+    source .venv/bin/activate
+    # On Windows use: .venv\Scripts\activate
+    ```
+
+    *(Note: Added Windows activation command hint for completeness)*
+
+4. Install dependencies:
+
+    ```bash
+    uv pip install .
+    ```
+
+5. Start the test server:
+
+    ```bash
+    mcp dev src/cstoolbox/main.py
+    ```
+
+    Now you can perform functional tests via `http://127.0.0.1:6274/#tools`
+
+6. HTTP API Testing
+    Add the following configuration to your `.vscode/launch.json` file:
+
+    ```json
+    {
+        "version": "0.2.0",
+        "configurations": [
+            {
+                "name": "http dev",
+                "type": "debugpy",
+                "request": "launch",
+                "module": "cstoolbox.http_api",
+                "args": [
+                ],
+                "console": "integratedTerminal",
+                "env": {
+                    "PYTHONPATH": "${workspaceFolder}/src",
+                    "CS_BROWSER_TZ": "Asia/Shanghai",
+                    "CS_BROWSER_LANG": "zh-CN",
+                    "CS_LOG_LEVEL": "DEBUG",
+                    "CS_PROXY": "http://localhost:15154"
+                },
+                "python": "${workspaceFolder}/.venv/bin/python"
+                // On Windows, adjust python path: "${workspaceFolder}\\.venv\\Scripts\\python.exe"
+            }
+        ]
+    }
+    ```
+
+    *(Note: Added Windows python path hint for completeness)*
+
+    Adjust the `CS_*` settings in the `env` configuration according to your actual environment. After starting the debug session in VS Code, you can test using the following endpoints:
+
+    - Search: `curl http://localhost:12321/chp/web_search?provider=google&kw=deepseek+r2&number=10&page=1`
+    - Content Crawling: `curl http://localhost:12321/chp/web_crawler?url=https://medium.com/@lbq999/deepseek-r2-is-around-the-corner-c449a41bfec6`
+
+## License
+
+This project is open-sourced under the [MIT License](LICENSE). You are free to use, modify, and distribute this software.
