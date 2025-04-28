@@ -1,12 +1,15 @@
-name: Build and Publish to PyPI
+name: Build and Publish to TestPyPI
 
 on:
-  push:
-    tags:
-      - 'v*'
+  workflow_dispatch:
+    inputs:
+      version:
+        description: 'Version tag for test (e.g. v1.0.0-test)'
+        required: true
+        default: 'latest-test'
 
 jobs:
-  build-and-publish:
+  build-and-test:
     runs-on: ubuntu-latest
     permissions:
       contents: read
@@ -26,15 +29,15 @@ jobs:
       - name: Add uv to PATH
         run: echo "$HOME/.cargo/bin" >> $GITHUB_PATH
 
-      - name: Extract version from tag
-        id: extract_version
+      - name: Set test version
+        id: set_version
         run: |
-          VERSION=${GITHUB_REF#refs/tags/}
+          VERSION="${{ github.event.inputs.version }}-$(date +%s)"
           echo "version=${VERSION}" >> $GITHUB_OUTPUT
 
-      - name: Build and Publish
+      - name: Build and Publish to TestPyPI
         env:
-          API_TOKEN: ${{ secrets.PYPI_TOKEN }}
+          TEST_API_TOKEN: ${{ secrets.TEST_PYPI_TOKEN }}
         run: |
           uv build
-          uv publish --index pypi --token $API_TOKEN
+          uv publish --index testpypi --token $TEST_API_TOKEN
