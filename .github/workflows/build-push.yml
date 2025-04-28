@@ -1,4 +1,4 @@
-name: Build with UV and Publish with UVX
+name: Build and Publish Package to PyPI or TestPyPI
 
 on:
   push:
