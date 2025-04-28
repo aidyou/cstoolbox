@@ -1,6 +1,6 @@
 # CSToolbox (ChatSpeed Toolbox)
 
-[简体中文](README.zh-CN.md) | English
+[简体中文](README-Zh.MD) | English
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
 
