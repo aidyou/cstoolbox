@@ -1,0 +1,26 @@
+#!/bin/bash
+
+# Check if version argument is provided
+if [ -z "$1" ]; then
+    echo "Error: Version number is required"
+    echo "Usage: $0 <version>"
+    exit 1
+fi
+
+VERSION=$1
+CURRENT_VERSION=$(grep "__version__" src/cstoolbox/__version__.py | cut -d'"' -f2)
+
+# Compare versions
+if [ "$(printf '%s\n' "$VERSION" "$CURRENT_VERSION" | sort -V | head -n1)" != "$CURRENT_VERSION" ]; then
+    echo "Error: New version ($VERSION) must be greater than or equal to current version ($CURRENT_VERSION)"
+    exit 1
+fi
+
+# Update version file
+sed -i '' "s/__version__ = \".*\"/__version__ = \"$VERSION\"/" src/cstoolbox/__version__.py
+
+# Commit and tag
+git add .
+git commit -m "Prepare for $VERSION release"
+git tag -a "$VERSION" -m "Release version $VERSION"
+git push origin "$VERSION"
